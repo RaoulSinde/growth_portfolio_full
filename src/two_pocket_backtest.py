@@ -18,6 +18,9 @@ from . import two_pocket_data as tpd
 __all__ = [
     "VERSIONS",
     "VERSION_LABELS",
+    "COMPOSITE_LABEL",
+    "COMPOSITE_CAP_LABEL",
+    "DEFAULT_MOMENTUM_WEIGHT",
     "OUTPUT_DIR",
     "build_portfolios",
     "compute_results",
@@ -25,15 +28,16 @@ __all__ = [
     "run_two_pocket_backtest",
 ]
 
-QUALITY_PURE_LABEL = "Quality pure"
-QUALITY_CAP_LABEL = "Quality pure 3x"
+COMPOSITE_LABEL = "Quality-Momentum"
+COMPOSITE_CAP_LABEL = "Quality-Momentum 3x"
+DEFAULT_MOMENTUM_WEIGHT = 0.30
 VERSION_CONFIGS = {
-    QUALITY_PURE_LABEL: {
-        "score_column": "score_quality_pure",
+    COMPOSITE_LABEL: {
+        "score_column": "score_composite",
         "max_weight_multiple": None,
     },
-    QUALITY_CAP_LABEL: {
-        "score_column": "score_quality_pure",
+    COMPOSITE_CAP_LABEL: {
+        "score_column": "score_composite",
         "max_weight_multiple": 3.0,
     },
 }
@@ -104,11 +108,24 @@ def _period_table(nav_map: dict[str, pd.Series], freq: str) -> pd.DataFrame:
     return table
 
 
+def _composite_score(day: pd.DataFrame, momentum_weight: float) -> pd.Series:
+    """Score composite Quality/Momentum, robuste aux composantes manquantes."""
+    quality = day["score_quality_pure"].astype(float)
+    momentum = day["score_momentum"].astype(float)
+    weight = float(momentum_weight)
+    if weight <= 0.0:
+        return quality
+    if weight >= 1.0:
+        return momentum
+    score = (1.0 - weight) * quality + weight * momentum
+    return score.where(quality.notna() & momentum.notna())
+
+
 def _heuristic_portfolios(
     panel: pd.DataFrame,
     label: str,
-    score_column: str,
     max_weight_multiple: float | None = None,
+    momentum_weight: float = DEFAULT_MOMENTUM_WEIGHT,
 ) -> dict:
     holding_parts = []
     budget_parts = []
@@ -121,16 +138,18 @@ def _heuristic_portfolios(
                 "ticker",
                 "sector",
                 "benchmark_weight",
-                score_column,
+                "score_quality_pure",
+                "score_momentum",
                 "is_megacap",
             ]
         ].copy()
+        frame["score_composite"] = _composite_score(frame, momentum_weight)
         eligible = set(day.loc[day["eligible"].astype(bool), "ticker"])
         result = tpc.build_two_pocket_portfolio(
             frame,
             n_quant=40,
             eligible_tickers=eligible,
-            score_column=score_column,
+            score_column="score_composite",
             max_weight_multiple=max_weight_multiple,
         )
         holdings = result.holdings.copy()
@@ -148,7 +167,7 @@ def _heuristic_portfolios(
             {
                 "date": date,
                 "version": label,
-                "score_type": score_column,
+                "score_type": "score_composite",
                 "sum_weight": result.diagnostics["total_weight"],
                 "max_sector_gap": result.diagnostics["max_sector_gap"],
                 "budget_residual": result.diagnostics["budget_residual"],
@@ -177,7 +196,8 @@ def _heuristic_portfolios(
     }
     return {
         "n_quant": 40,
-        "score_column": score_column,
+        "score_column": "score_composite",
+        "momentum_weight": float(momentum_weight),
         "max_weight_multiple": max_weight_multiple,
         "holdings": holdings,
         "sector_budget": budget,
@@ -190,8 +210,11 @@ def build_portfolios(
     panel: pd.DataFrame,
     market: dict | None = None,
     versions: Iterable[str] = VERSIONS,
+    momentum_weight: float = DEFAULT_MOMENTUM_WEIGHT,
 ) -> dict[str, dict]:
-    """Construit les portefeuilles Quant 40 pour chaque score qualite."""
+    """Construit les portefeuilles Quant 40 pour chaque variante."""
+    if not 0.0 <= float(momentum_weight) <= 1.0:
+        raise ValueError("momentum_weight doit etre compris entre 0 et 1")
     output: dict[str, dict] = {}
     for label in versions:
         if label not in VERSION_CONFIGS:
@@ -200,8 +223,8 @@ def build_portfolios(
         output[label] = _heuristic_portfolios(
             panel,
             label,
-            config["score_column"],
             config["max_weight_multiple"],
+            momentum_weight,
         )
     return output
 
@@ -328,8 +351,7 @@ def _active_positions(panel: pd.DataFrame, holdings: pd.DataFrame) -> pd.DataFra
         )
         part["active_weight"] = part["portfolio_weight"] - part["benchmark_weight"]
         part["pocket"] = held.set_index("ticker")["pocket"].reindex(universe).fillna("Non detenu")
-        score_column = VERSION_CONFIGS[version]["score_column"]
-        part["score"] = day.set_index("ticker")[score_column].reindex(universe)
+        part["score"] = held.set_index("ticker")["score"].reindex(universe)
         part["z"] = held.set_index("ticker")["z"].reindex(universe)
         part = part.reset_index().rename(columns={"index": "ticker"})
         part.insert(0, "date", date)
@@ -393,13 +415,24 @@ def compute_results(
     market: dict,
     tx_cost_bps: float = 10.0,
     portfolios: dict | None = None,
+    momentum_weight: float = DEFAULT_MOMENTUM_WEIGHT,
 ) -> dict:
     """Construit, backteste et agrege toutes les sorties analytiques."""
+    if not 0.0 <= float(momentum_weight) <= 1.0:
+        raise ValueError("momentum_weight doit etre compris entre 0 et 1")
     panel = panel.copy()
     panel["date"] = pd.to_datetime(panel["date"]).dt.normalize()
     dates = sorted(panel["date"].unique())
     if portfolios is None:
-        portfolios = build_portfolios(panel, market, VERSIONS)
+        portfolios = build_portfolios(
+            panel,
+            market,
+            VERSIONS,
+            momentum_weight=momentum_weight,
+        )
+    else:
+        first = next(iter(portfolios.values()))
+        momentum_weight = float(first.get("momentum_weight", momentum_weight))
 
     strategies = {label: data["weights"] for label, data in portfolios.items()}
     nav_result = gp_backtest.run_backtest(
@@ -575,10 +608,18 @@ def compute_results(
             label: {
                 "n_quant": int(data["n_quant"]),
                 "score": data["score_column"],
+                "quality_weight": 1.0 - float(momentum_weight),
+                "momentum_weight": float(momentum_weight),
                 "max_weight_multiple": data["max_weight_multiple"],
             }
             for label, data in portfolios.items()
         },
+        "quality_weight": 1.0 - float(momentum_weight),
+        "momentum_weight": float(momentum_weight),
+        "momentum_definition": (
+            "6M-1M risk-adjusted price momentum + 200d trend, "
+            "sector-neutral z-score on adjusted prices"
+        ),
         "mega_weight_threshold": float(tpc.MEGA_WEIGHT_THRESHOLD),
         "alphabet_tickers": list(tpc.ALPHABET_TICKERS),
         "mega_caps_latest": latest_mega,
@@ -666,11 +707,17 @@ def run_two_pocket_backtest(
     tx_cost_bps: float = 10.0,
     force_panel: bool = False,
     save: bool = True,
+    momentum_weight: float = DEFAULT_MOMENTUM_WEIGHT,
 ) -> dict:
     """Pipeline complet : panel PIT -> portefeuilles -> backtest -> exports."""
     panel = tpd.build_universe_panel(force=force_panel, save=save)
     market = tpd.load_market_prices()
-    results = compute_results(panel, market, tx_cost_bps=tx_cost_bps)
+    results = compute_results(
+        panel,
+        market,
+        tx_cost_bps=tx_cost_bps,
+        momentum_weight=momentum_weight,
+    )
     if save:
         save_results(results)
     return results

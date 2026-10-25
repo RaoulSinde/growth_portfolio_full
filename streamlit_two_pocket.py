@@ -12,9 +12,10 @@ import plotly.graph_objects as go
 import streamlit as st
 
 from src.two_pocket_backtest import (
+    COMPOSITE_CAP_LABEL,
+    COMPOSITE_LABEL,
+    DEFAULT_MOMENTUM_WEIGHT,
     OUTPUT_DIR,
-    QUALITY_CAP_LABEL,
-    QUALITY_PURE_LABEL,
     build_portfolios,
     compute_results,
 )
@@ -26,11 +27,11 @@ TRADING_DAYS = 252
 
 COLORS = {
     "Benchmark": "#58A6FF",
-    QUALITY_PURE_LABEL: "#2ECC71",
-    QUALITY_CAP_LABEL: "#F0B429",
+    COMPOSITE_LABEL: "#2ECC71",
+    COMPOSITE_CAP_LABEL: "#F0B429",
 }
-LABELS = ["Benchmark", QUALITY_PURE_LABEL, QUALITY_CAP_LABEL]
-VERSION_OPTIONS = ["Comparaison", QUALITY_PURE_LABEL, QUALITY_CAP_LABEL]
+LABELS = ["Benchmark", COMPOSITE_LABEL, COMPOSITE_CAP_LABEL]
+VERSION_OPTIONS = ["Comparaison", COMPOSITE_LABEL, COMPOSITE_CAP_LABEL]
 PLOT_TEMPLATE = "plotly_dark"
 TRANSPARENT = "rgba(0,0,0,0)"
 
@@ -156,6 +157,7 @@ def get_panel() -> pd.DataFrame:
         panel["date"] = pd.to_datetime(panel["date"]).dt.normalize()
         if (
             "score_quality_pure" in panel.columns
+            and "score_momentum" in panel.columns
             and "score_quality_garp" not in panel.columns
         ):
             return panel
@@ -168,17 +170,22 @@ def get_market() -> dict:
 
 
 @st.cache_data(show_spinner="Construction des portefeuilles...")
-def get_portfolios() -> dict:
-    return build_portfolios(get_panel(), get_market())
+def get_portfolios(momentum_pct: int) -> dict:
+    return build_portfolios(
+        get_panel(),
+        get_market(),
+        momentum_weight=float(momentum_pct) / 100.0,
+    )
 
 
 @st.cache_data(show_spinner="Backtest au niveau de cout demande...")
-def get_results(tx_cost_bps: float) -> dict:
+def get_results(tx_cost_bps: float, momentum_pct: int) -> dict:
     return compute_results(
         get_panel(),
         get_market(),
         tx_cost_bps=float(tx_cost_bps),
-        portfolios=get_portfolios(),
+        portfolios=get_portfolios(int(momentum_pct)),
+        momentum_weight=float(momentum_pct) / 100.0,
     )
 
 
@@ -620,10 +627,21 @@ def main() -> None:
         focus = st.radio("Version", VERSION_OPTIONS, index=0)
         detail_version = (
             st.selectbox(
-                "Version detaillee", [QUALITY_PURE_LABEL, QUALITY_CAP_LABEL], index=0
+                "Version detaillee", [COMPOSITE_LABEL, COMPOSITE_CAP_LABEL], index=0
             )
             if focus == "Comparaison"
             else focus
+        )
+        momentum_pct = st.slider(
+            "Part momentum dans le score (%)",
+            min_value=0,
+            max_value=100,
+            value=int(round(DEFAULT_MOMENTUM_WEIGHT * 100)),
+            step=5,
+        )
+        st.caption(
+            f"Score composite : Quality {100 - momentum_pct} % / "
+            f"Momentum {momentum_pct} %"
         )
         selected_date = st.selectbox(
             "Date de rebalancement",
@@ -645,7 +663,7 @@ def main() -> None:
             st.cache_data.clear()
             st.rerun()
 
-    results = get_results(float(tx_cost))
+    results = get_results(float(tx_cost), int(momentum_pct))
     stats = results["stats"]
     nav = results["nav_daily"].copy()
     nav["date"] = pd.to_datetime(nav["date"])
@@ -664,12 +682,12 @@ def main() -> None:
     mega_caps = results["mega_caps"]
 
     active_labels = (
-        ["Benchmark", QUALITY_PURE_LABEL, QUALITY_CAP_LABEL]
+        ["Benchmark", COMPOSITE_LABEL, COMPOSITE_CAP_LABEL]
         if focus == "Comparaison"
         else ["Benchmark", detail_version]
     )
     shown_versions = (
-        [QUALITY_PURE_LABEL, QUALITY_CAP_LABEL]
+        [COMPOSITE_LABEL, COMPOSITE_CAP_LABEL]
         if focus == "Comparaison"
         else [detail_version]
     )
@@ -677,14 +695,15 @@ def main() -> None:
     st.title("MSCI USA Growth - Portefeuille Two-Pocket")
     st.caption(
         "Mega-caps dynamiques (poids societe > 3 %, Alphabet = GOOG + GOOGL) "
-        "+ stock-picking Quant 40 sur score de qualite intra-sectoriel, "
-        "neutralite sectorielle, deux variantes : quality pure et quality pure 3x."
+        "+ stock-picking Quant 40 sur score composite Quality/Momentum intra-sectoriel, "
+        "neutralite sectorielle, deux variantes : sans plafond et max 3x."
     )
 
     latest_date = pd.to_datetime(validation["date"]).max()
     st.info(
         f"{metadata['n_rebalances']} rebalancements | "
         f"{metadata['start']} -> {metadata['end']} | "
+        f"Quality {100 - momentum_pct} % / Momentum {momentum_pct} % | "
         f"couts {tx_cost} bps | "
         f"seuil mega-cap {metadata['mega_weight_threshold']:.0%} | "
         f"dernier rebalancement : {latest_date.strftime('%d/%m/%Y')}"
@@ -1058,26 +1077,43 @@ regroupes sous **Alphabet** pour la detection et l'affichage. Les mega-caps
 conservent leur poids indiciel dans les deux versions.
 
 **Poche 2 - Stock-picking quantitatif (Quant 40).** Pour chaque secteur, le score
-de qualite est standardise en Z-score intra-sectoriel. Le nombre de titres quant
+composite est standardise en Z-score intra-sectoriel. Le nombre de titres quant
 est reparti entre secteurs proportionnellement au budget residuel
 $B_S^{quant} = b_S - \sum_{i \in Mega \cap S} w_i$, avec un minimum de 1 titre
 par secteur actif. Les poids bruts sont ajustes par le signal puis normalises pour
 saturer le budget sectoriel : la neutralite sectorielle est **stricte**.
 
-**Deux variantes de score.**
+**Score Quality.** `55 % ROE + 45 % FCF yield`. Le score mesure la rentabilite
+du capital et la generation de cash, sans composante de valorisation.
 
-- **Quality pure** : `55 % ROE + 45 % FCF yield`. Le score mesure la rentabilite
-  du capital et la generation de cash, sans composante de valorisation.
-- **Quality pure 3x** : meme score, avec un plafond de poids par ligne
-  $w_i \le 3\,b_i$. Si ce plafond empeche de saturer le budget du secteur,
-  des titres supplementaires sont selectionnes dans ce meme secteur. Lorsque
-  l'univers note ne permet pas de saturer le budget sous 3x, le plafond est
-  relaxe au minimum necessaire et le secteur est signale dans la validation.
+**Score Momentum.** Momentum de prix **6M-1M ajuste du risque**, filtre de
+tendance 200 jours, calcule sur les prix ajustes et uniquement avec l'historique
+disponible a la date de rebalancement :
 
-Les deux variantes partent de la construction **Quant 40** : aucun optimiseur,
-aucune contrainte de tracking error. La version 3x peut depasser 40 lignes
-lorsque le plafond impose des titres supplementaires pour saturer les budgets
-sectoriels. La TE affichee est une mesure realisee ex-post, pas une contrainte.
+- `ret_6_1 = P(t-21j) / P(t-126j) - 1`
+- `RAM = ret_6_1 / volatilite annualisee 6M`
+- `trend = P(t) / SMA200 - 1`
+- `M_raw = 0.65 z(RAM) + 0.35 z(trend)`, puis Z-score intra-sectoriel.
+
+Les z-scores sont winsorises aux percentiles 5/95 et calcules par secteur GICS.
+Un titre sans historique suffisant (moins de 60 rendements ou SMA200 non
+calculable) recoit un momentum manquant. Aucune revision EPS n'est disponible
+dans les donnees : le momentum est un signal de prix, pas de revisions.
+
+**Score composite.** `S = (1 - w) * Quality + w * Momentum`, avec `w` reglable
+dans la sidebar (defaut **30 %**). Si `w > 0`, les deux composantes doivent etre
+disponibles ; sinon le titre n'est pas eligible a la poche quant. Le momentum ne
+s'applique qu'a la poche Quant : les mega-caps restent aux poids de l'indice.
+
+**Deux variantes et plafond 3x.** Les deux variantes partent du **meme score
+composite** et de la construction **Quant 40** : aucun optimiseur, aucune
+contrainte de tracking error. La variante **Quality-Momentum 3x** ajoute
+uniquement un plafond de poids par ligne $w_i \le 3\,b_i$. Si ce plafond empeche
+de saturer le budget du secteur, des titres supplementaires sont selectionnes
+dans ce meme secteur. Lorsque l'univers note ne permet pas de saturer le budget
+sous 3x, le plafond est relaxe au minimum necessaire et le secteur est signale
+dans la validation. La version 3x peut donc depasser 40 lignes. La TE affichee
+est une mesure realisee ex-post, pas une contrainte.
 
 **Metriques relatives.** Les Up/Down Capture sont calculees sur les rendements
 mensuels composes, puis rapportees aux mois ou le benchmark monte ou baisse.
@@ -1128,13 +1164,13 @@ reporte separement.
 - Fenetre : **{metadata['start']} -> {metadata['end']}**.
 - Rebalancement : **trimestriel**, 21 dates.
 - Couts de transaction : **{tx_cost:.0f} bps** (reglables dans la sidebar).
-- Prix : composants non ajustes pour la NAV.
-- Scores : qualite fondamentale PIT, uniquement avec des donnees publiees avant
-  la date de rebalancement.
-- Les titres sans prix ou sans score restent dans le benchmark mais ne sont pas
-  eligibles a la poche quant.
-- Les deux versions sont construites avec **Quant 40** ; la TE realisee est
-  reportee a titre informatif.
+- Prix : composants non ajustes pour la NAV ; prix ajustes pour le momentum.
+- Scores : qualite fondamentale PIT et momentum prix PIT, uniquement avec des
+  donnees disponibles avant la date de rebalancement.
+- Les titres sans prix ou sans score composite restent dans le benchmark mais ne
+  sont pas eligibles a la poche quant.
+- Les deux versions sont construites avec **Quant 40** et le meme score composite ;
+  la TE realisee est reportee a titre informatif.
             """
         )
 

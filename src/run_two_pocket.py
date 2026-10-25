@@ -5,7 +5,7 @@ import argparse
 
 import pandas as pd
 
-from .two_pocket_backtest import OUTPUT_DIR, run_two_pocket_backtest
+from .two_pocket_backtest import DEFAULT_MOMENTUM_WEIGHT, OUTPUT_DIR, run_two_pocket_backtest
 
 
 def _print_summary(results: dict) -> None:
@@ -18,6 +18,11 @@ def _print_summary(results: dict) -> None:
     print(f"Rebalancements     : {meta['n_rebalances']} dates trimestrielles")
     print(f"Couts de transaction: {meta['tx_cost_bps']:.1f} bps")
     print(
+        "Score composite    : "
+        f"Quality {meta.get('quality_weight', 1.0 - DEFAULT_MOMENTUM_WEIGHT):.0%} / "
+        f"Momentum {meta.get('momentum_weight', DEFAULT_MOMENTUM_WEIGHT):.0%}"
+    )
+    print(
         "Mega-caps          : dynamiques, poids societe > "
         f"{meta['mega_weight_threshold']:.0%} "
         f"(Alphabet = {' + '.join(meta['alphabet_tickers'])})"
@@ -25,7 +30,8 @@ def _print_summary(results: dict) -> None:
     print(
         "Scores             : "
         + " | ".join(
-            f"{label} ({data['score']}"
+            f"{label} (Quality {data.get('quality_weight', 1.0 - DEFAULT_MOMENTUM_WEIGHT):.0%}"
+            f" / Momentum {data.get('momentum_weight', DEFAULT_MOMENTUM_WEIGHT):.0%}"
             + (
                 f", cap x{data['max_weight_multiple']:.1f}"
                 if data.get("max_weight_multiple") is not None
@@ -88,13 +94,19 @@ def _print_summary(results: dict) -> None:
 
 def main() -> None:
     parser = argparse.ArgumentParser(
-        description="Backtest Quant 40 MSCI USA Growth (quality pure / quality pure 3x)."
+        description="Backtest Quant 40 MSCI USA Growth (Quality-Momentum / Quality-Momentum 3x)."
     )
     parser.add_argument(
         "--cost-bps",
         type=float,
         default=10.0,
         help="Couts de transaction en points de base (defaut: 10).",
+    )
+    parser.add_argument(
+        "--momentum-weight",
+        type=float,
+        default=DEFAULT_MOMENTUM_WEIGHT,
+        help="Part du momentum dans le score composite, entre 0 et 1 (defaut: 0.30).",
     )
     parser.add_argument(
         "--force-panel",
@@ -112,6 +124,7 @@ def main() -> None:
         tx_cost_bps=float(args.cost_bps),
         force_panel=bool(args.force_panel),
         save=not bool(args.no_save),
+        momentum_weight=float(args.momentum_weight),
     )
     _print_summary(results)
 

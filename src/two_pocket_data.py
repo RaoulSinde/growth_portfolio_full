@@ -4,7 +4,7 @@ Le panel produit contient, pour chaque date de rebalancement et chaque titre du
 benchmark, les seules informations necessaires a la construction :
 
 - ``ticker``, ``sector``, ``benchmark_weight`` ;
-- ``score_quality_pure`` calcule point-in-time ;
+- ``score_quality_pure`` et ``score_momentum`` calcules point-in-time ;
 - ``is_megacap``, ``price_available`` et ``eligible``.
 """
 from __future__ import annotations
@@ -106,6 +106,65 @@ def _price_available(prices: pd.DataFrame, date: pd.Timestamp, tickers: pd.Serie
     return pd.Series(np.isfinite(values.to_numpy()) & (values.to_numpy() > 0), index=tickers.index)
 
 
+def _momentum_scores(
+    prices: pd.DataFrame,
+    date: pd.Timestamp,
+    tickers: pd.Series,
+    sector: pd.Series,
+) -> pd.DataFrame:
+    """Momentum prix 6M-1M ajuste du risque + tendance 200j, PIT.
+
+    Le calcul est strictement tronque a ``date``. Les prix ajustes evitent les
+    distorsions de splits/dividendes. Le score final est un z-score sectoriel.
+    """
+    index = pd.Index(tickers.to_numpy())
+    empty = pd.DataFrame(
+        np.nan,
+        index=index,
+        columns=["score_momentum", "momentum_ram_z", "momentum_trend_z"],
+        dtype=float,
+    )
+    hist = prices.loc[prices.index <= date]
+    if hist.empty or len(hist) < gp_factors.MOM_6M + 1:
+        return empty
+
+    px = hist.ffill(limit=5)
+    tickers_idx = pd.Index(tickers.to_numpy())
+    p1m = px.iloc[-gp_factors.MOM_1M].reindex(tickers_idx)
+    p6m = px.iloc[-gp_factors.MOM_6M].reindex(tickers_idx)
+    ret_6_1 = p1m / p6m - 1.0
+
+    returns = px.pct_change(fill_method=None)
+    vol_window = returns.tail(gp_factors.VOL_WINDOW_6M)
+    n_obs = vol_window.notna().sum()
+    vol_6m = vol_window.std() * np.sqrt(252.0)
+    vol_6m = vol_6m.where(n_obs >= gp_factors.MIN_VOL_OBS)
+    ram = ret_6_1 / vol_6m.reindex(tickers_idx)
+
+    last_price = px.iloc[-1].reindex(tickers_idx)
+    trend_window = px.tail(gp_factors.SMA_TREND)
+    sma200 = trend_window.mean().reindex(tickers_idx)
+    sma200 = sma200.where(
+        trend_window.notna().sum().reindex(tickers_idx) >= gp_factors.SMA_TREND
+    )
+    trend = last_price / sma200 - 1.0
+
+    sector_series = pd.Series(sector).reindex(index)
+    s_ram = gp_factors.zscore(ram.reindex(index), by_sector=True, sector=sector_series)
+    s_trend = gp_factors.zscore(trend.reindex(index), by_sector=True, sector=sector_series)
+    raw = _blend_scores([(s_ram, 0.65), (s_trend, 0.35)])
+    score = gp_factors.zscore(raw, by_sector=True, sector=sector_series)
+
+    return pd.DataFrame(
+        {
+            "score_momentum": score,
+            "momentum_ram_z": s_ram,
+            "momentum_trend_z": s_trend,
+        },
+        index=index,
+    )
+
+
 def build_universe_panel(
     force: bool = False,
     save: bool = True,
@@ -118,6 +177,7 @@ def build_universe_panel(
         if (
             not panel.empty
             and "score_quality_pure" in panel.columns
+            and "score_momentum" in panel.columns
             and "score_quality_garp" not in panel.columns
         ):
             return panel.reset_index(drop=True)
@@ -126,6 +186,7 @@ def build_universe_panel(
     weights = market["weights"]
     sectors = market["sectors"]
     prices = market["prices"]
+    adjusted_prices = load_adjusted_prices()
     benchmark = market["benchmark"]
     benchmark_returns = benchmark.pct_change(fill_method=None)
     fund = pd.read_parquet(_FUNDAMENTALS_FILE)
@@ -170,6 +231,12 @@ def build_universe_panel(
             by_sector=True,
             sector=day.set_index("ticker")["sector"],
         )
+        momentum = _momentum_scores(
+            adjusted_prices,
+            date,
+            day["ticker"],
+            day.set_index("ticker")["sector"],
+        )
         frame = pd.DataFrame(
             {
                 "date": date,
@@ -177,8 +244,11 @@ def build_universe_panel(
                 "sector": day["sector"].to_numpy(),
                 "benchmark_weight": day["weight"].to_numpy(dtype=float),
                 "score_quality_pure": day["ticker"].map(quality_pure).to_numpy(dtype=float),
+                "score_momentum": day["ticker"].map(momentum["score_momentum"]).to_numpy(dtype=float),
                 "quality_roe": day["ticker"].map(scores["S_ROE"]).to_numpy(dtype=float),
                 "quality_fcf_yield": day["ticker"].map(scores["S_FCFYield"]).to_numpy(dtype=float),
+                "momentum_ram_z": day["ticker"].map(momentum["momentum_ram_z"]).to_numpy(dtype=float),
+                "momentum_trend_z": day["ticker"].map(momentum["momentum_trend_z"]).to_numpy(dtype=float),
             }
         )
         frame["company"] = frame["ticker"].map(company_name)
@@ -190,7 +260,10 @@ def build_universe_panel(
         frame["eligible"] = (
             (~frame["is_megacap"])
             & frame["price_available"]
-            & frame["score_quality_pure"].notna()
+            & (
+                frame["score_quality_pure"].notna()
+                | frame["score_momentum"].notna()
+            )
             & (frame["benchmark_weight"] > 0.0)
         )
         frames.append(frame)
