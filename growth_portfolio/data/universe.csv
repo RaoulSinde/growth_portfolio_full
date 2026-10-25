@@ -1,0 +1,91 @@
+ticker,name,prop_sector,gics_sector,weight_pct
+NVDA,NVIDIA CORP,Information Technology,Information Technology,15.35144891206257
+AAPL,APPLE INC,Information Technology,Information Technology,12.91487014940339
+MSFT,MICROSOFT CORP,Information Technology,Information Technology,10.839266018249274
+AMZN,AMAZON COM INC,Consumer Discretionary,Consumer Discretionary,6.738193121427856
+AVGO,BROADCOM INC,Information Technology,Information Technology,5.314348741602327
+GOOG,ALPHABET INC CLASS C,Communication,Communication Services,4.522209966910659
+TSLA,TESLA INC,Consumer Discretionary,Consumer Discretionary,4.171262408502958
+LLY,ELI LILLY,Health Care,Health Care,2.627093151509075
+V,VISA INC CLASS A,Financials,Financials,2.095658277348842
+MA,MASTERCARD INC CLASS A,Financials,Financials,1.875062669206859
+AMD,ADVANCED MICRO DEVICES INC,Information Technology,Information Technology,1.2433570640729972
+LRCX,LAM RESEARCH CORP,Information Technology,Information Technology,1.2132758447809084
+PLTR,PALANTIR TECHNOLOGIES INC CLASS A,Information Technology,Information Technology,1.123032186904643
+GWW,WW GRAINGER INC,Industrials,Industrials,1.0929509676125542
+TT,TRANE TECHNOLOGIES PLC,Industrials,Industrials,1.082923894515191
+ORCL,ORACLE CORP,Information Technology,Information Technology,1.0628697483204654
+NOW,SERVICENOW INC,Information Technology,Information Technology,1.0428156021257395
+ADSK,AUTODESK INC,Information Technology,Information Technology,0.9124636518600222
+NFLX,NETFLIX INC,Communication,Communication Services,0.9024365787626594
+PANW,PALO ALTO NETWORKS INC,Information Technology,Information Technology,0.8823824325679335
+ECL,ECOLAB INC,Materials,Materials,0.8523012132758448
+IDXX,IDEXX LABORATORIES INC,Health Care,Health Care,0.8322470670811192
+SNPS,SYNOPSYS INC,Information Technology,Information Technology,0.6918680437180388
+GEV,GE VERNOVA INC,Industrials,Industrials,0.6718138975233131
+GILD,GILEAD SCIENCES INC,Health Care,Health Care,0.6617868244259502
+GE,GE AEROSPACE,Industrials,Industrials,0.6617868244259502
+UBER,UBER TECHNOLOGIES INC,Industrials,Industrials,0.6417326782312244
+CDNS,CADENCE DESIGN SYSTEMS INC,Information Technology,Information Technology,0.6417326782312244
+ANET,ARISTA NETWORKS INC,Information Technology,Information Technology,0.6116514589391356
+MTD,METTLER TOLEDO INC,Health Care,Health Care,0.6116514589391356
+VLTO,VERALTO CORP,Industrials,Industrials,0.59159731274441
+WELL,WELLTOWER INC,Real Estate,Real Estate,0.5815702396470471
+MCO,MOODYS CORP,Financials,Financials,0.5715431665496842
+BKNG,BOOKING HOLDINGS INC,Consumer Discretionary,Consumer Discretionary,0.5615160934523215
+LNG,CHENIERE ENERGY INC,Energy,Energy,0.5615160934523215
+CBRE,CBRE GROUP INC CLASS A,Real Estate,Real Estate,0.5314348741602327
+MELI,MERCADOLIBRE INC,Consumer Discretionary,Consumer Discretionary,0.4512182893813297
+VRTX,VERTEX PHARMACEUTICALS INC,Health Care,Health Care,0.43116414318660384
+COST,COSTCO WHOLESALE CORP,Consumer Staples,Consumer Staples,0.421137070089241
+VEEV,VEEVA SYSTEMS INC CLASS A,Health Care,Health Care,0.421137070089241
+KLAC,KLA CORP,Information Technology,Information Technology,0.4010829238945152
+CAT,CATERPILLAR INC,Industrials,Industrials,0.4010829238945152
+ISRG,INTUITIVE SURGICAL INC,Health Care,Health Care,0.4010829238945152
+MCK,MCKESSON CORP,Health Care,Health Care,0.4010829238945152
+WAT,WATERS CORP,Health Care,Health Care,0.3810287776997895
+APP,APPLOVIN CORP CLASS A,Information Technology,Information Technology,0.3810287776997895
+MRVL,MARVELL TECHNOLOGY INC,Information Technology,Information Technology,0.3609746315050637
+HUBS,HUBSPOT INC,Information Technology,Information Technology,0.3208663391156122
+FLUT,FLUTTER ENTERTAINMENT PLC,Consumer Discretionary,Consumer Discretionary,0.3208663391156122
+IT,GARTNER INC,Information Technology,Information Technology,0.3108392660182493
+AXON,AXON ENTERPRISE INC,Industrials,Industrials,0.3008121929208864
+FTNT,FORTINET INC,Information Technology,Information Technology,0.29078511982352356
+EME,EMCOR GROUP INC,Industrials,Industrials,0.29078511982352356
+MSI,MOTOROLA SOLUTIONS INC,Information Technology,Information Technology,0.29078511982352356
+CRWD,CROWDSTRIKE HOLDINGS INC CLASS A,Information Technology,Information Technology,0.2707309736287978
+TRGP,TARGA RESOURCES CORP,Energy,Energy,0.2707309736287978
+CIEN,CIENA CORP,Information Technology,Information Technology,0.2707309736287978
+HOOD,ROBINHOOD MARKETS INC CLASS A,Financials,Financials,0.2607039005314349
+MDB,MONGODB INC CLASS A,Information Technology,Information Technology,0.25067682743407205
+DT,DYNATRACE INC,Information Technology,Information Technology,0.24064975433670915
+FIX,COMFORT SYSTEMS USA INC,Industrials,Industrials,0.23062268123934626
+HWM,HOWMET AEROSPACE INC,Industrials,Industrials,0.22059560814198337
+ALNY,ALNYLAM PHARMACEUTICALS INC,Health Care,Health Care,0.2105685350446205
+WDAY,WORKDAY INC CLASS A,Information Technology,Information Technology,0.2105685350446205
+EQT,EQT CORP,Energy,Energy,0.2005414619472576
+ZS,ZSCALER INC,Information Technology,Information Technology,0.2005414619472576
+PTC,PTC INC,Information Technology,Information Technology,0.2005414619472576
+ULTA,ULTA BEAUTY INC,Consumer Discretionary,Consumer Discretionary,0.18048731575253185
+NTNX,NUTANIX INC CLASS A,Information Technology,Information Technology,0.18048731575253185
+FICO,FAIR ISAAC CORP,Information Technology,Information Technology,0.170460242655169
+SNOW,SNOWFLAKE INC,Information Technology,Information Technology,0.170460242655169
+RCL,ROYAL CARIBBEAN GROUP LTD,Consumer Discretionary,Consumer Discretionary,0.170460242655169
+CVNA,CARVANA CLASS A,Consumer Discretionary,Consumer Discretionary,0.1604331695578061
+VRSN,VERISIGN INC,Information Technology,Information Technology,0.1604331695578061
+CMG,CHIPOTLE MEXICAN GRILL INC,Consumer Discretionary,Consumer Discretionary,0.1604331695578061
+RIVN,RIVIAN AUTOMOTIVE INC CLASS A,Consumer Discretionary,Consumer Discretionary,0.1604331695578061
+RKLB,ROCKET LAB CORP,Industrials,Industrials,0.1504060964604432
+FSLR,FIRST SOLAR INC,Information Technology,Information Technology,0.14037902336308036
+NET,CLOUDFLARE INC CLASS A,Information Technology,Information Technology,0.14037902336308036
+CEG,CONSTELLATION ENERGY CORP,Utilities,Utilities,0.13035195026571744
+TEAM,ATLASSIAN CORP CLASS A,Information Technology,Information Technology,0.13035195026571744
+DASH,DOORDASH INC CLASS A,Consumer Discretionary,Consumer Discretionary,0.12032487716835458
+MPWR,MONOLITHIC POWER SYSTEMS INC,Information Technology,Information Technology,0.11029780407099168
+BURL,BURLINGTON STORES INC,Consumer Discretionary,Consumer Discretionary,0.11029780407099168
+DDOG,DATADOG INC CLASS A,Information Technology,Information Technology,0.1002707309736288
+GDDY,GODADDY INC CLASS A,Information Technology,Information Technology,0.1002707309736288
+EQH,EQUITABLE HOLDINGS INC,Financials,Financials,0.1002707309736288
+BSY,BENTLEY SYSTEMS INC CLASS B,Information Technology,Information Technology,0.09024365787626593
+CRDO,CREDO TECHNOLOGY GROUP HOLDING LTD,Information Technology,Information Technology,0.09024365787626593
+BE,BLOOM ENERGY CLASS A CORP,Industrials,Industrials,0.07018951168154018
