@@ -1,0 +1,10 @@
+pandas==2.2.3
+numpy==2.2.3
+scipy==1.15.2
+openpyxl==3.1.5
+yfinance==0.2.66
+pyarrow==19.0.1
+streamlit==1.44.0
+plotly==6.0.0
+pytest==9.1.1
+requests==2.34.2
