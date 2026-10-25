@@ -1,0 +1,57 @@
+{
+  "start": "2020-12-31",
+  "end": "2025-12-31",
+  "rebalance_dates": [
+    "2020-12-31",
+    "2021-03-31",
+    "2021-06-30",
+    "2021-09-30",
+    "2021-12-31",
+    "2022-03-31",
+    "2022-06-30",
+    "2022-09-30",
+    "2022-12-30",
+    "2023-03-31",
+    "2023-06-30",
+    "2023-09-29",
+    "2023-12-29",
+    "2024-03-29",
+    "2024-06-28",
+    "2024-09-30",
+    "2024-12-31",
+    "2025-03-31",
+    "2025-06-30",
+    "2025-09-30",
+    "2025-12-31"
+  ],
+  "n_rebalances": 21,
+  "versions": {
+    "Quality pure": {
+      "n_quant": 40,
+      "score": "score_quality_pure",
+      "max_weight_multiple": null
+    },
+    "Quality pure 3x": {
+      "n_quant": 40,
+      "score": "score_quality_pure",
+      "max_weight_multiple": 3.0
+    }
+  },
+  "mega_weight_threshold": 0.03,
+  "alphabet_tickers": [
+    "GOOG",
+    "GOOGL"
+  ],
+  "mega_caps_latest": [
+    "AAPL",
+    "AMZN",
+    "AVGO",
+    "Alphabet",
+    "MSFT",
+    "NVDA",
+    "TSLA"
+  ],
+  "tx_cost_bps": 10.0,
+  "generated_at": "2026-10-25T01:52:01",
+  "benchmark": "MSCI USA Growth"
+}

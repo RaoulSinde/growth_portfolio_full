@@ -1,0 +1,370 @@
+{
+  "metadata": {
+    "description": "Audit read-only du benchmark MSCI USA Growth et de l'indice reconstruit",
+    "period": {
+      "start": "2020-12-31",
+      "end": "2025-12-31"
+    },
+    "annualization_days": 252,
+    "cagr_basis": "calendar days / 365.25",
+    "cagr_years": 4.999315537303217,
+    "sources": [
+      "data/processed/index_prices.parquet",
+      "data/processed/reconstructed_index.parquet",
+      "data/processed/index_weights.parquet",
+      "data/cache/coverage_by_snapshot.csv"
+    ]
+  },
+  "alignment": {
+    "dates_equal": true,
+    "rows_official_only": 0,
+    "rows_recon_only": 0,
+    "n_obs_period": 1305,
+    "start": "2020-12-31",
+    "end": "2025-12-31"
+  },
+  "headline": {
+    "official_price": {
+      "cumulative_return_pct": 102.59005879170284,
+      "cagr_pct": 15.168052246022423
+    },
+    "recon_price": {
+      "cumulative_return_pct": 105.13159552039096,
+      "cagr_pct": 15.455614140565554
+    },
+    "recon_total_return": {
+      "cumulative_return_pct": 110.0641818348946,
+      "cagr_pct": 16.00567304119922
+    },
+    "recon_cash": {
+      "cumulative_return_pct": 103.90172652737499,
+      "cagr_pct": 15.31681882791367
+    },
+    "official_minus_recon_price_gap_pp": -2.5415367286881096,
+    "official_minus_recon_total_return_gap_pp": -7.474123043191749,
+    "dividend_effect_recon_pp": 4.93258631450364
+  },
+  "risk_official_price": {
+    "annualized_volatility_pct": 22.632882794385534,
+    "max_drawdown_pct": -35.44945146665799,
+    "max_drawdown_trough": "2022-10-14",
+    "max_drawdown_peak": "2021-11-19"
+  },
+  "risk_recon_price": {
+    "annualized_volatility_pct": 22.74709270091319,
+    "max_drawdown_pct": -35.53586992096178,
+    "max_drawdown_trough": "2022-10-14",
+    "max_drawdown_peak": "2021-12-27"
+  },
+  "annual_returns_pct": {
+    "2021": {
+      "official_price": 25.71905129452947,
+      "recon_price": 27.418329416265763,
+      "recon_total_return": 27.946893360475002
+    },
+    "2022": {
+      "official_price": -32.34692194624053,
+      "recon_price": -33.062074095363144,
+      "recon_total_return": -32.7061837971324
+    },
+    "2023": {
+      "official_price": 45.86467934200886,
+      "recon_price": 46.464989973420835,
+      "recon_total_return": 47.32896743423491
+    },
+    "2024": {
+      "official_price": 35.403482326288184,
+      "recon_price": 35.11161638851543,
+      "recon_total_return": 35.73483242431279
+    },
+    "2025": {
+      "official_price": 20.60060855862096,
+      "recon_price": 21.535145136451295,
+      "recon_total_return": 22.00219594525461
+    }
+  },
+  "quarterly_returns_pct": [
+    {
+      "quarter_end": "2021-03-31",
+      "official_price": 0.4738676384795193,
+      "recon_price": 0.655309133980686,
+      "recon_total_return": 0.7624495544530152
+    },
+    {
+      "quarter_end": "2021-06-30",
+      "official_price": 12.416142056402379,
+      "recon_price": 12.652143411290574,
+      "recon_total_return": 12.779435135460382
+    },
+    {
+      "quarter_end": "2021-09-30",
+      "official_price": 1.2586677734803375,
+      "recon_price": 1.3611488338894695,
+      "recon_total_return": 1.4593862123053913
+    },
+    {
+      "quarter_end": "2021-12-31",
+      "official_price": 9.922624405661251,
+      "recon_price": 10.862389784526737,
+      "recon_total_return": 10.970842410287185
+    },
+    {
+      "quarter_end": "2022-03-31",
+      "official_price": -9.099997453441866,
+      "recon_price": -9.24415401189952,
+      "recon_total_return": -9.15219234282294
+    },
+    {
+      "quarter_end": "2022-06-30",
+      "official_price": -23.050674855323106,
+      "recon_price": -23.35050810381417,
+      "recon_total_return": -23.25314216965545
+    },
+    {
+      "quarter_end": "2022-09-30",
+      "official_price": -3.6820147207807685,
+      "recon_price": -3.6512727684881674,
+      "recon_total_return": -3.5172532457339867
+    },
+    {
+      "quarter_end": "2022-12-31",
+      "official_price": 0.4179752359070532,
+      "recon_price": -0.1283144195182495,
+      "recon_total_return": 0.034646970225482576
+    },
+    {
+      "quarter_end": "2023-03-31",
+      "official_price": 17.2190613926958,
+      "recon_price": 17.38780089660348,
+      "recon_total_return": 17.563823328487803
+    },
+    {
+      "quarter_end": "2023-06-30",
+      "official_price": 13.706288398808585,
+      "recon_price": 13.8984775286896,
+      "recon_total_return": 14.060654615969149
+    },
+    {
+      "quarter_end": "2023-09-30",
+      "official_price": -3.5673764774427963,
+      "recon_price": -3.68871719452204,
+      "recon_total_return": -3.56954023843844
+    },
+    {
+      "quarter_end": "2023-12-31",
+      "official_price": 13.486299848330763,
+      "recon_price": 13.740667613870695,
+      "recon_total_return": 13.936886225063638
+    },
+    {
+      "quarter_end": "2024-03-31",
+      "official_price": 11.598767234984187,
+      "recon_price": 11.619672726261365,
+      "recon_total_return": 11.743440958337658
+    },
+    {
+      "quarter_end": "2024-06-30",
+      "official_price": 9.242872043952977,
+      "recon_price": 9.047308514492979,
+      "recon_total_return": 9.174477426114635
+    },
+    {
+      "quarter_end": "2024-09-30",
+      "official_price": 2.5004913838947207,
+      "recon_price": 2.493584086029954,
+      "recon_total_return": 2.608052885104617
+    },
+    {
+      "quarter_end": "2024-12-31",
+      "official_price": 8.355604589427434,
+      "recon_price": 8.302956853781996,
+      "recon_total_return": 8.434305502486428
+    },
+    {
+      "quarter_end": "2025-03-31",
+      "official_price": -11.032672359561346,
+      "recon_price": -11.038129601911184,
+      "recon_total_return": -10.946737670990913
+    },
+    {
+      "quarter_end": "2025-06-30",
+      "official_price": 19.139632190502944,
+      "recon_price": 20.367760520584376,
+      "recon_total_return": 20.490286806275293
+    },
+    {
+      "quarter_end": "2025-09-30",
+      "official_price": 10.662910724855411,
+      "recon_price": 10.578327015865984,
+      "recon_total_return": 10.68292179635102
+    },
+    {
+      "quarter_end": "2025-12-31",
+      "official_price": 2.8159776686514704,
+      "recon_price": 2.64026939713784,
+      "recon_total_return": 2.72713136277134
+    }
+  ],
+  "coverage": {
+    "weighted_coverage_min": 0.9658083843738519,
+    "weighted_coverage_max": 0.999195921591745,
+    "weighted_coverage_mean": 0.9855805365484868,
+    "n_tickers_min": 160.0,
+    "n_tickers_max": 270.0,
+    "n_tickers_mean": 231.06436781609196,
+    "snapshots_in_period": 61,
+    "snapshot_coverage_ratio_min": 0.965808384373852,
+    "snapshot_coverage_ratio_mean": 0.9857691887625046,
+    "missing_tickers_snapshots": 61
+  },
+  "anomalies": {
+    "missing_values": {
+      "index_level": 0,
+      "recon_level": 0,
+      "recon_cash_level": 0,
+      "recon_level_adj": 0,
+      "coverage": 0,
+      "n_tickers": 0
+    },
+    "duplicate_dates_in_inputs": {
+      "index_prices": 0,
+      "reconstructed_index": 0
+    },
+    "non_positive_levels": {
+      "official": 0,
+      "recon_price": 0,
+      "recon_total_return": 0
+    },
+    "non_business_day_rows_count": 48,
+    "non_business_day_rows": [
+      "2021-01-01",
+      "2021-01-18",
+      "2021-02-15",
+      "2021-04-02",
+      "2021-05-31",
+      "2021-07-05",
+      "2021-09-06",
+      "2021-11-25",
+      "2021-12-24",
+      "2022-01-17",
+      "2022-02-21",
+      "2022-04-15",
+      "2022-05-30",
+      "2022-06-20",
+      "2022-07-04",
+      "2022-09-05",
+      "2022-11-24",
+      "2022-12-26",
+      "2023-01-02",
+      "2023-01-16",
+      "2023-02-20",
+      "2023-04-07",
+      "2023-05-29",
+      "2023-06-19",
+      "2023-07-04",
+      "2023-09-04",
+      "2023-11-23",
+      "2023-12-25",
+      "2024-01-01",
+      "2024-01-15",
+      "2024-02-19",
+      "2024-03-29",
+      "2024-05-27",
+      "2024-06-19",
+      "2024-07-04",
+      "2024-09-02",
+      "2024-11-28",
+      "2024-12-25",
+      "2025-01-01",
+      "2025-01-20",
+      "2025-02-17",
+      "2025-04-18",
+      "2025-05-26",
+      "2025-06-19",
+      "2025-07-04",
+      "2025-09-01",
+      "2025-11-27",
+      "2025-12-25"
+    ],
+    "zero_daily_return_rows_count": 49,
+    "zero_return_rows_on_holidays": [
+      "2021-01-01",
+      "2021-01-18",
+      "2021-02-15",
+      "2021-04-02",
+      "2021-05-31",
+      "2021-07-05",
+      "2021-09-06",
+      "2021-11-25",
+      "2021-12-24",
+      "2022-01-17",
+      "2022-02-21",
+      "2022-04-15",
+      "2022-05-30",
+      "2022-06-20",
+      "2022-07-04",
+      "2022-09-05",
+      "2022-11-24",
+      "2022-12-26",
+      "2023-01-02",
+      "2023-01-16",
+      "2023-02-20",
+      "2023-04-07",
+      "2023-05-29",
+      "2023-06-19",
+      "2023-07-04",
+      "2023-09-04",
+      "2023-11-23",
+      "2023-12-25",
+      "2024-01-01",
+      "2024-01-15",
+      "2024-02-19",
+      "2024-03-29",
+      "2024-05-27",
+      "2024-06-19",
+      "2024-07-04",
+      "2024-09-02",
+      "2024-11-28",
+      "2024-12-25",
+      "2025-01-01",
+      "2025-01-20",
+      "2025-02-17",
+      "2025-04-18",
+      "2025-05-26",
+      "2025-06-19",
+      "2025-07-04",
+      "2025-09-01",
+      "2025-11-27",
+      "2025-12-25"
+    ],
+    "zero_return_rows_on_trading_days_count": 1,
+    "zero_return_rows_on_trading_days": [
+      "2025-01-09"
+    ],
+    "jumps_gt_20pct_count": 0,
+    "jumps_gt_20pct": [],
+    "level_start_consistency": {
+      "official_start": 8519.701858,
+      "recon_price_start": 8519.701858,
+      "recon_total_return_start": 8519.701858,
+      "abs_diff_recon_vs_official_start": 0.0
+    },
+    "level_end_consistency": {
+      "official_end": 17260.069003,
+      "recon_price_end": 17476.600354895792,
+      "recon_total_return_end": 17896.842002780013,
+      "price_gap_pp": 1.254521936489117
+    },
+    "adj_to_price_ratio_range": {
+      "min": 1.0,
+      "max": 1.024045960847671
+    },
+    "max_abs_level_divergence_pct": {
+      "value": 1.5152239969713488,
+      "date": "2025-06-26",
+      "signed_at_date_pct": 1.5152239969713488
+    },
+    "coverage_out_of_bounds": 0,
+    "n_tickers_zero_or_missing": 0
+  }
+}
