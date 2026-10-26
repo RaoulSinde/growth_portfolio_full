@@ -26,17 +26,24 @@
   ],
   "n_rebalances": 21,
   "versions": {
-    "Quality pure": {
+    "Quality-Momentum": {
       "n_quant": 40,
-      "score": "score_quality_pure",
+      "score": "score_composite",
+      "quality_weight": 0.75,
+      "momentum_weight": 0.25,
       "max_weight_multiple": null
     },
-    "Quality pure 3x": {
+    "Quality-Momentum 3x": {
       "n_quant": 40,
-      "score": "score_quality_pure",
+      "score": "score_composite",
+      "quality_weight": 0.75,
+      "momentum_weight": 0.25,
       "max_weight_multiple": 3.0
     }
   },
+  "quality_weight": 0.75,
+  "momentum_weight": 0.25,
+  "momentum_definition": "6M-1M risk-adjusted price momentum + 200d trend, sector-neutral z-score on adjusted prices",
   "mega_weight_threshold": 0.03,
   "alphabet_tickers": [
     "GOOG",
@@ -52,6 +59,6 @@
     "TSLA"
   ],
   "tx_cost_bps": 10.0,
-  "generated_at": "2026-10-25T01:52:01",
+  "generated_at": "2026-10-26T07:06:18",
   "benchmark": "MSCI USA Growth"
 }

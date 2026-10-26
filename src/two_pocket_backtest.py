@@ -30,7 +30,7 @@ __all__ = [
 
 COMPOSITE_LABEL = "Quality-Momentum"
 COMPOSITE_CAP_LABEL = "Quality-Momentum 3x"
-DEFAULT_MOMENTUM_WEIGHT = 0.30
+DEFAULT_MOMENTUM_WEIGHT = 0.25
 VERSION_CONFIGS = {
     COMPOSITE_LABEL: {
         "score_column": "score_composite",

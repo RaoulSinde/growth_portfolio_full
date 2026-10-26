@@ -106,7 +106,7 @@ def main() -> None:
         "--momentum-weight",
         type=float,
         default=DEFAULT_MOMENTUM_WEIGHT,
-        help="Part du momentum dans le score composite, entre 0 et 1 (defaut: 0.30).",
+        help="Part du momentum dans le score composite, entre 0 et 1 (defaut: 0.25).",
     )
     parser.add_argument(
         "--force-panel",

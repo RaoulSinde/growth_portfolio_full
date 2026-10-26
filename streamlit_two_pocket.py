@@ -12,7 +12,6 @@ import plotly.graph_objects as go
 import streamlit as st
 
 from src.two_pocket_backtest import (
-    COMPOSITE_CAP_LABEL,
     COMPOSITE_LABEL,
     DEFAULT_MOMENTUM_WEIGHT,
     OUTPUT_DIR,
@@ -28,10 +27,7 @@ TRADING_DAYS = 252
 COLORS = {
     "Benchmark": "#58A6FF",
     COMPOSITE_LABEL: "#2ECC71",
-    COMPOSITE_CAP_LABEL: "#F0B429",
 }
-LABELS = ["Benchmark", COMPOSITE_LABEL, COMPOSITE_CAP_LABEL]
-VERSION_OPTIONS = ["Comparaison", COMPOSITE_LABEL, COMPOSITE_CAP_LABEL]
 PLOT_TEMPLATE = "plotly_dark"
 TRANSPARENT = "rgba(0,0,0,0)"
 
@@ -174,6 +170,7 @@ def get_portfolios(momentum_pct: int) -> dict:
     return build_portfolios(
         get_panel(),
         get_market(),
+        versions=(COMPOSITE_LABEL,),
         momentum_weight=float(momentum_pct) / 100.0,
     )
 
@@ -622,16 +619,11 @@ def main() -> None:
     panel = get_panel()
     dates = sorted(pd.to_datetime(panel["date"]).unique())
 
+    detail_version = COMPOSITE_LABEL
+
     with st.sidebar:
         st.header("Parametres")
-        focus = st.radio("Version", VERSION_OPTIONS, index=0)
-        detail_version = (
-            st.selectbox(
-                "Version detaillee", [COMPOSITE_LABEL, COMPOSITE_CAP_LABEL], index=0
-            )
-            if focus == "Comparaison"
-            else focus
-        )
+        st.caption("Variante unique : Quality-Momentum (sans plafond 3x).")
         momentum_pct = st.slider(
             "Part momentum dans le score (%)",
             min_value=0,
@@ -681,22 +673,14 @@ def main() -> None:
     metadata = results["metadata"]
     mega_caps = results["mega_caps"]
 
-    active_labels = (
-        ["Benchmark", COMPOSITE_LABEL, COMPOSITE_CAP_LABEL]
-        if focus == "Comparaison"
-        else ["Benchmark", detail_version]
-    )
-    shown_versions = (
-        [COMPOSITE_LABEL, COMPOSITE_CAP_LABEL]
-        if focus == "Comparaison"
-        else [detail_version]
-    )
+    active_labels = ["Benchmark", detail_version]
+    shown_versions = [detail_version]
 
     st.title("MSCI USA Growth - Portefeuille Two-Pocket")
     st.caption(
         "Mega-caps dynamiques (poids societe > 3 %, Alphabet = GOOG + GOOGL) "
         "+ stock-picking Quant 40 sur score composite Quality/Momentum intra-sectoriel, "
-        "neutralite sectorielle, deux variantes : sans plafond et max 3x."
+        "neutralite sectorielle, variante unique sans plafond 3x."
     )
 
     latest_date = pd.to_datetime(validation["date"]).max()
@@ -1074,7 +1058,7 @@ def main() -> None:
 **Poche 1 - Mega-caps dynamiques.** Une societe est mega-cap si son poids agrege
 dans le benchmark depasse **3 %** a la date consideree. `GOOG` et `GOOGL` sont
 regroupes sous **Alphabet** pour la detection et l'affichage. Les mega-caps
-conservent leur poids indiciel dans les deux versions.
+conservent leur poids indiciel dans la variante affichee.
 
 **Poche 2 - Stock-picking quantitatif (Quant 40).** Pour chaque secteur, le score
 composite est standardise en Z-score intra-sectoriel. Le nombre de titres quant
@@ -1101,19 +1085,15 @@ calculable) recoit un momentum manquant. Aucune revision EPS n'est disponible
 dans les donnees : le momentum est un signal de prix, pas de revisions.
 
 **Score composite.** `S = (1 - w) * Quality + w * Momentum`, avec `w` reglable
-dans la sidebar (defaut **30 %**). Si `w > 0`, les deux composantes doivent etre
+dans la sidebar (defaut **25 %**). Si `w > 0`, les deux composantes doivent etre
 disponibles ; sinon le titre n'est pas eligible a la poche quant. Le momentum ne
 s'applique qu'a la poche Quant : les mega-caps restent aux poids de l'indice.
 
-**Deux variantes et plafond 3x.** Les deux variantes partent du **meme score
-composite** et de la construction **Quant 40** : aucun optimiseur, aucune
-contrainte de tracking error. La variante **Quality-Momentum 3x** ajoute
-uniquement un plafond de poids par ligne $w_i \le 3\,b_i$. Si ce plafond empeche
-de saturer le budget du secteur, des titres supplementaires sont selectionnes
-dans ce meme secteur. Lorsque l'univers note ne permet pas de saturer le budget
-sous 3x, le plafond est relaxe au minimum necessaire et le secteur est signale
-dans la validation. La version 3x peut donc depasser 40 lignes. La TE affichee
-est une mesure realisee ex-post, pas une contrainte.
+**Variante affichee.** Le dashboard presente une seule variante,
+**Quality-Momentum**, construite en **Quant 40** : aucun optimiseur, aucune
+contrainte de tracking error et aucun plafond 3x. La TE affichee est une mesure
+realisee ex-post, pas une contrainte. La version 3x reste disponible dans le CLI
+et les exports de recherche, mais n'est plus exposee dans le dashboard.
 
 **Metriques relatives.** Les Up/Down Capture sont calculees sur les rendements
 mensuels composes, puis rapportees aux mois ou le benchmark monte ou baisse.
@@ -1169,7 +1149,7 @@ reporte separement.
   donnees disponibles avant la date de rebalancement.
 - Les titres sans prix ou sans score composite restent dans le benchmark mais ne
   sont pas eligibles a la poche quant.
-- Les deux versions sont construites avec **Quant 40** et le meme score composite ;
+- La variante affichee est construite avec **Quant 40** et le score composite ;
   la TE realisee est reportee a titre informatif.
             """
         )
